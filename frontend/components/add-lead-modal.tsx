@@ -1,16 +1,18 @@
 "use client"
 
-import React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { Loader2 } from "lucide-react"
+import { Loader2, Calendar as CalendarIcon } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 interface AddLeadModalProps {
     isOpen: boolean
@@ -21,6 +23,7 @@ interface AddLeadModalProps {
 export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModalProps) {
     const { toast } = useToast()
     const [isLoading, setIsLoading] = useState(false)
+    const [date, setDate] = useState<Date | undefined>(new Date())
 
     const [formData, setFormData] = useState({
         leadName: "",
@@ -28,7 +31,7 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
         companySize: "",
         channel: "",
         interactionCount: "0",
-        lastInteractionDate: new Date().toISOString().split('T')[0], 
+        lastInteractionDate: new Date().toISOString().split('T')[0],
         requestedPricing: false,
         requestedDemo: false,
     })
@@ -36,6 +39,12 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
     const handleInputChange = (field: string, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }))
     }
+
+    useEffect(() => {
+        if (date) {
+            handleInputChange("lastInteractionDate", format(date, "yyyy-MM-dd"))
+        }
+    }, [date])
 
     const validateForm = () => {
         if (!formData.leadName.trim()) {
@@ -228,17 +237,35 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
                             />
                         </div>
 
+
+                        {/* Last Interaction Date Section */}
                         <div className="space-y-2">
-                            <Label htmlFor="lastInteractionDate" className="text-sm text-foreground">
+                            <Label className="text-sm text-foreground">
                                 Last Interaction Date
                             </Label>
-                            <Input
-                                id="lastInteractionDate"
-                                type="date"
-                                value={formData.lastInteractionDate}
-                                onChange={(e) => handleInputChange("lastInteractionDate", e.target.value)}
-                                className="bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground w-full block"
-                            />
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal bg-white/5 border-white/10 text-foreground hover:bg-white/10 hover:text-foreground",
+                                            !date && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 bg-zinc-900 border-white/10" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={date}
+                                        onSelect={setDate}
+                                        initialFocus
+                                        className="text-foreground"
+                                    />
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     </div>
 
