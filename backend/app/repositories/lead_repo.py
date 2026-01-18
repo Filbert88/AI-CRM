@@ -64,36 +64,55 @@ class LeadRepository:
     
     def get_actions(self) -> List[ActionItem]:
         """
-        Generate action items for the top 3 hot leads.
+        Generate action items for high-priority leads based on specific signals.
         
-        Returns:
-            List of ActionItem objects for high-priority leads
+        Rules:
+        1. Negotiation -> Follow up on contract
+        2. Pricing Request -> Send pricing package
+        3. Demo Request -> Schedule demo
+        4. Stalled (>7 days) -> Re-engage
+        5. Default -> High priority follow-up
         """
-        # Get top 3 hot leads by score
+        # Get top 5 hot leads
         response = self._client.table(self.TABLE_NAME)\
             .select("*")\
             .eq("priority", Priority.HOT.value)\
             .order("score", desc=True)\
-            .limit(3)\
+            .limit(5)\
             .execute()
         
         actions: List[ActionItem] = []
-        for idx, lead in enumerate(response.data, start=1):
+        for idx, lead_data in enumerate(response.data, start=1):
+            lead = self._row_to_lead_response(lead_data)
+            action_text = ""
+            
+            if lead.stage == Stage.NEGOTIATION:
+                action_text = f"Follow up on contract terms with {lead.industry} lead"
+            elif lead.has_requested_pricing:
+                action_text = f"Send customized pricing package to {lead.lead_id}"
+            elif lead.has_demo_request and lead.stage == Stage.NEW:
+                action_text = f"Schedule product demo with {lead.lead_id}"
+            elif lead.last_interaction_days_ago > 7:
+                action_text = f"Re-engage {lead.lead_id} - no contact for {lead.last_interaction_days_ago} days"
+            else:
+                action_text = f"High priority follow-up with {lead.lead_id} (Score: {lead.score_details.score})"
+            
             actions.append(ActionItem(
                 id=f"ACTION-{idx:03d}",
-                action_text=f"Follow up with {lead['lead_id']} - High priority lead in {lead['industry']} sector (Score: {lead['score']})",
+                action_text=action_text,
                 is_done=False,
-                lead_id=lead["lead_id"]
+                lead_id=lead.lead_id
             ))
+            
+            if len(actions) >= 5:
+                break
         
-        # Add additional action suggestion
-        if response.data:
-            actions.append(ActionItem(
-                id=f"ACTION-{len(response.data) + 1:03d}",
-                action_text="Schedule weekly review meeting for hot leads pipeline",
-                is_done=False,
-                lead_id=response.data[0]["lead_id"]
-            ))
+        actions.append(ActionItem(
+            id=f"ACTION-{len(actions) + 1:03d}",
+            action_text="Schedule weekly review meeting for hot leads pipeline",
+            is_done=False,
+            lead_id="SYSTEM"
+        ))
         
         return actions
     
