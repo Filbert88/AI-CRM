@@ -2,8 +2,9 @@
 Pydantic models (schemas) for data validation.
 """
 from enum import Enum
-from typing import List, Optional
-from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional, Any
+from datetime import date, datetime
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 
 
 class Priority(str, Enum):
@@ -45,10 +46,33 @@ class LeadInput(BaseModel):
     company_size: int = Field(..., ge=1, description="Number of employees in the company")
     channel: str = Field(..., description="Acquisition channel (e.g., Website, Referral, LinkedIn)")
     interaction_count: int = Field(..., ge=0, description="Total number of interactions with the lead")
-    last_interaction_days_ago: int = Field(..., ge=0, description="Days since the last interaction")
+    last_interaction_days_ago: Optional[int] = Field(None, ge=0, description="Days since the last interaction")
+    last_interaction_date: Optional[date] = Field(None, description="Date of the last interaction (YYYY-MM-DD)")
     has_requested_pricing: bool = Field(..., description="Whether the lead has requested pricing information")
     has_demo_request: bool = Field(..., description="Whether the lead has requested a demo")
     stage: Stage = Field(default=Stage.NEW, description="Pipeline stage")
+
+    @model_validator(mode='before')
+    @classmethod
+    def calculate_days_ago(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if data.get('last_interaction_date') and data.get('last_interaction_days_ago') is None:
+                try:
+                    interaction_val = data['last_interaction_date']
+                    if isinstance(interaction_val, str):
+                        interaction_date = datetime.strptime(interaction_val, "%Y-%m-%d").date()
+                    else:
+                        interaction_date = interaction_val
+                    
+                    days_ago = (date.today() - interaction_date).days
+                    data['last_interaction_days_ago'] = max(0, days_ago)
+                except (ValueError, TypeError):
+                    pass 
+            
+            if data.get('last_interaction_days_ago') is None and data.get('last_interaction_date') is None:
+                 data['last_interaction_days_ago'] = 0
+                 
+        return data
 
 
 class ScoringResult(BaseModel):
