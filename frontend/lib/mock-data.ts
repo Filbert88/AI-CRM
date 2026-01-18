@@ -1,0 +1,85 @@
+export const mockPipelineMetrics = [
+  {
+    id: "hot",
+    label: "Hot Leads",
+    value: 24,
+    trend: "+12%",
+    glowClass: "glow-red",
+    color: "text-red-500",
+    bgColor: "bg-red-500/10",
+  },
+  {
+    id: "warm",
+    label: "Warm Leads",
+    value: 48,
+    trend: "+8%",
+    glowClass: "glow-orange",
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/10",
+  },
+  {
+    id: "cold",
+    label: "Cold Leads",
+    value: 156,
+    trend: "-3%",
+    glowClass: "glow-blue",
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+  },
+]
+
+export const mockActions = [
+  { id: 1, title: "Email Lead #102", description: "Sarah Johnson - TechCorp", priority: "high" },
+  { id: 2, title: "Schedule Call", description: "Mike Chen - InnovateLabs", priority: "high" },
+  { id: 3, title: "Send Proposal", description: "Lisa Anderson - GrowthCo", priority: "medium" },
+  { id: 4, title: "Follow-up", description: "David Lee - StartupsInc", priority: "medium" },
+  { id: 5, title: "Demo Request", description: "Emma Wilson - TechHub", priority: "low" },
+]
+
+export const mockLeads = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    company: "TechCorp",
+    score: 92,
+    priority: "hot",
+    explanation: "High engagement, multiple interactions this week",
+    avatar: "SJ",
+  },
+  {
+    id: 2,
+    name: "Mike Chen",
+    company: "InnovateLabs",
+    score: 78,
+    priority: "warm",
+    explanation: "Interested in features, needs pricing discussion",
+    avatar: "MC",
+  },
+  {
+    id: 3,
+    name: "Lisa Anderson",
+    company: "GrowthCo",
+    score: 64,
+    priority: "warm",
+    explanation: "Opened emails, viewed pricing page",
+    avatar: "LA",
+  },
+  {
+    id: 4,
+    name: "David Lee",
+    company: "StartupsInc",
+    score: 42,
+    priority: "cold",
+    explanation: "Limited interaction, needs nurturing",
+    avatar: "DL",
+  },
+  {
+    id: 5,
+    name: "Emma Wilson",
+    company: "TechHub",
+    score: 35,
+    priority: "cold",
+    explanation: "First contact, initial interest shown",
+    avatar: "EW",
+  },
+]
