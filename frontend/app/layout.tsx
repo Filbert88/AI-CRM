@@ -9,26 +9,71 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "AI CRM - Sales Intelligence Platform",
-  description: "Revolutionize your sales pipeline with AI-powered lead management",
-  generator: "v0.app",
-  icons: {
-    icon: [
+  title: {
+    default: "AI CRM - Intelligent Sales Pipeline & Lead Scoring",
+    template: "%s | AI CRM"
+  },
+  description: "Revolutionize your sales process with AI-powered lead scoring, automated insights, and smart pipeline management. Close more deals with data-driven decisions.",
+  keywords: ["CRM", "AI", "Lead Scoring", "Sales Pipeline", "Sales Intelligence", "Automation", "Business Intelligence"],
+  authors: [{ name: "AI CRM Team" }],
+  creator: "AI CRM",
+  publisher: "AI CRM",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://ai-crm-olj.vercel.app"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "AI CRM - Intelligent Sales Pipeline & Lead Scoring",
+    description: "Revolutionize your sales process with AI-powered lead scoring, automated insights, and smart pipeline management.",
+    url: "https://ai-crm-olj.vercel.app",
+    siteName: "AI CRM",
+    images: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/og-image.png", 
+        width: 1200,
+        height: 630,
+        alt: "AI CRM Dashboard",
       },
     ],
-    apple: "/apple-icon.png",
+    locale: "en_US",
+    type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI CRM - Intelligent Sales Pipeline & Lead Scoring",
+    description: "Revolutionize your sales process with AI-powered lead scoring, automated insights, and smart pipeline management.",
+    images: ["/og-image.png"], 
+    creator: "@aicrm",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png" },
+    ],
+    other: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "192x192",
+        url: "/android-chrome-192x192.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "512x512",
+        url: "/android-chrome-512x512.png",
+      },
+    ]
+  },
+  manifest: "/site.webmanifest",
 }
 
 export default function RootLayout({

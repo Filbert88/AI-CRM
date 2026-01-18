@@ -28,7 +28,7 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
         companySize: "",
         channel: "",
         interactionCount: "0",
-        lastInteraction: "0",
+        lastInteractionDate: new Date().toISOString().split('T')[0], 
         requestedPricing: false,
         requestedDemo: false,
     })
@@ -71,7 +71,7 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
                 company_size: parseInt(formData.companySize),
                 channel: formData.channel,
                 interaction_count: parseInt(formData.interactionCount),
-                last_interaction_days_ago: parseInt(formData.lastInteraction),
+                last_interaction_date: formData.lastInteractionDate,
                 has_requested_pricing: formData.requestedPricing,
                 has_demo_request: formData.requestedDemo,
             }
@@ -98,7 +98,7 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
                 companySize: "",
                 channel: "",
                 interactionCount: "0",
-                lastInteraction: "0",
+                lastInteractionDate: new Date().toISOString().split('T')[0],
                 requestedPricing: false,
                 requestedDemo: false,
             })
@@ -229,16 +229,15 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="lastInteraction" className="text-sm text-foreground">
-                                Last Interaction (Days Ago)
+                            <Label htmlFor="lastInteractionDate" className="text-sm text-foreground">
+                                Last Interaction Date
                             </Label>
                             <Input
-                                id="lastInteraction"
-                                type="number"
-                                placeholder="0"
-                                value={formData.lastInteraction}
-                                onChange={(e) => handleInputChange("lastInteraction", e.target.value)}
-                                className="bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground"
+                                id="lastInteractionDate"
+                                type="date"
+                                value={formData.lastInteractionDate}
+                                onChange={(e) => handleInputChange("lastInteractionDate", e.target.value)}
+                                className="bg-white/5 border-white/10 text-foreground placeholder:text-muted-foreground w-full block"
                             />
                         </div>
                     </div>
