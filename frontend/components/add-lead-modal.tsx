@@ -118,15 +118,15 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
 
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
-            <SheetContent className="w-full sm:max-w-md border-white/10 bg-zinc-900">
-                <SheetHeader>
+            <SheetContent className="w-full sm:max-w-md border-white/10 bg-zinc-900 flex flex-col h-full p-0">
+                <SheetHeader className="px-6 pt-6 pb-4">
                     <SheetTitle className="text-foreground">Add New Lead</SheetTitle>
                     <SheetDescription className="text-muted-foreground">
                         Fill in the lead details to score and add them to your pipeline
                     </SheetDescription>
                 </SheetHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">
                     {/* Basic Info Section */}
                     <div className="space-y-4">
                         <h3 className="text-sm font-semibold text-foreground">Basic Information</h3>

@@ -5,6 +5,8 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 // Types matching backend schemas
+export type Stage = "new" | "meeting" | "negotiation" | "closed";
+
 export interface ScoringResult {
     score: number;
     priority: "Hot" | "Warm" | "Cold";
@@ -20,10 +22,21 @@ export interface LeadInput {
     last_interaction_days_ago: number;
     has_requested_pricing: boolean;
     has_demo_request: boolean;
+    stage?: Stage;
 }
 
 export interface LeadResponse extends LeadInput {
+    stage: Stage;
     score_details: ScoringResult;
+}
+
+// Pipeline lead format for Kanban board
+export interface PipelineLead {
+    id: string;
+    name: string;
+    company: string;
+    score: number;
+    stage: Stage;
 }
 
 export interface DashboardSummary {
@@ -49,6 +62,37 @@ export async function getLeads(): Promise<LeadResponse[]> {
     const response = await fetch(`${API_BASE_URL}/dashboard/leads`);
     if (!response.ok) {
         throw new Error("Failed to fetch leads");
+    }
+    return response.json();
+}
+
+/**
+ * Get leads formatted for the pipeline Kanban board
+ */
+export async function getPipelineLeads(): Promise<PipelineLead[]> {
+    const leads = await getLeads();
+    return leads.map(lead => ({
+        id: lead.lead_id,
+        name: lead.lead_id,
+        company: lead.industry,
+        score: lead.score_details.score,
+        stage: lead.stage || "new",
+    }));
+}
+
+/**
+ * Update a lead's pipeline stage
+ */
+export async function updateLeadStage(leadId: string, stage: Stage): Promise<LeadResponse> {
+    const response = await fetch(`${API_BASE_URL}/leads/${encodeURIComponent(leadId)}/stage`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ stage }),
+    });
+    if (!response.ok) {
+        throw new Error("Failed to update lead stage");
     }
     return response.json();
 }

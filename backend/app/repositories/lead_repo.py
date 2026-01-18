@@ -6,7 +6,7 @@ This module provides database operations for leads using Supabase.
 from typing import List, Optional
 from supabase import Client
 from app.models.schemas import (
-    LeadInput, LeadResponse, ScoringResult, Priority,
+    LeadInput, LeadResponse, ScoringResult, Priority, Stage,
     DashboardSummary, ActionItem
 )
 from app.core.database import get_supabase_client
@@ -119,6 +119,7 @@ class LeadRepository:
             "score": lead.score_details.score,
             "priority": lead.score_details.priority.value,
             "explanations": lead.score_details.explanations,
+            "stage": lead.stage.value,
         }
         
         self._client.table(self.TABLE_NAME).insert(data).execute()
@@ -155,12 +156,26 @@ class LeadRepository:
             last_interaction_days_ago=row["last_interaction_days_ago"],
             has_requested_pricing=row["has_requested_pricing"],
             has_demo_request=row["has_demo_request"],
+            stage=Stage(row.get("stage", "new")),
             score_details=ScoringResult(
                 score=row["score"],
                 priority=Priority(row["priority"]),
                 explanations=row["explanations"] or []
             )
         )
+    
+    def update_stage(self, lead_id: str, stage: Stage) -> Optional[LeadResponse]:
+        """
+        Update the pipeline stage for a lead.
+        """
+        response = self._client.table(self.TABLE_NAME)\
+            .update({"stage": stage.value})\
+            .eq("lead_id", lead_id)\
+            .execute()
+        
+        if response.data:
+            return self._row_to_lead_response(response.data[0])
+        return None
 
 
 def get_lead_repository() -> LeadRepository:

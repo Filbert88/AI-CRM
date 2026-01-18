@@ -3,8 +3,8 @@ Leads API Endpoints
 
 Endpoints for lead scoring and lead creation.
 """
-from fastapi import APIRouter, Depends, status
-from app.models.schemas import LeadInput, ScoringResult, LeadResponse
+from fastapi import APIRouter, Depends, status, HTTPException
+from app.models.schemas import LeadInput, ScoringResult, LeadResponse, StageUpdateRequest
 from app.services.scoring_engine import LeadScoringService, get_scoring_service
 from app.repositories.lead_repo import LeadRepository, get_lead_repository
 
@@ -69,3 +69,36 @@ async def create_lead(
     lead_repository.add_lead(lead_response)
     
     return lead_response
+
+
+@router.patch(
+    "/{lead_id}/stage",
+    response_model=LeadResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update lead pipeline stage",
+    description="Move a lead to a different stage in the sales pipeline."
+)
+async def update_lead_stage(
+    lead_id: str,
+    stage_update: StageUpdateRequest,
+    lead_repository: LeadRepository = Depends(get_lead_repository)
+) -> LeadResponse:
+    """
+    Update the pipeline stage for a lead.
+    
+    Stages: new -> meeting -> negotiation -> closed
+    
+    - **lead_id**: The lead ID to update
+    - **stage_update**: New stage value
+    - **Returns**: Updated lead response
+    """
+    updated_lead = lead_repository.update_stage(lead_id, stage_update.stage)
+    
+    if not updated_lead:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lead with ID '{lead_id}' not found"
+        )
+    
+    return updated_lead
+

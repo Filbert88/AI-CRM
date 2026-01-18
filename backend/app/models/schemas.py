@@ -13,6 +13,14 @@ class Priority(str, Enum):
     HOT = "Hot"
 
 
+class Stage(str, Enum):
+    """Sales pipeline stages."""
+    NEW = "new"
+    MEETING = "meeting"
+    NEGOTIATION = "negotiation"
+    CLOSED = "closed"
+
+
 class LeadInput(BaseModel):
     """Input model for lead scoring."""
     
@@ -26,7 +34,8 @@ class LeadInput(BaseModel):
                 "interaction_count": 8,
                 "last_interaction_days_ago": 3,
                 "has_requested_pricing": True,
-                "has_demo_request": False
+                "has_demo_request": False,
+                "stage": "new"
             }
         }
     )
@@ -39,6 +48,7 @@ class LeadInput(BaseModel):
     last_interaction_days_ago: int = Field(..., ge=0, description="Days since the last interaction")
     has_requested_pricing: bool = Field(..., description="Whether the lead has requested pricing information")
     has_demo_request: bool = Field(..., description="Whether the lead has requested a demo")
+    stage: Stage = Field(default=Stage.NEW, description="Pipeline stage")
 
 
 class ScoringResult(BaseModel):
@@ -77,6 +87,7 @@ class LeadResponse(LeadInput):
                 "last_interaction_days_ago": 3,
                 "has_requested_pricing": True,
                 "has_demo_request": False,
+                "stage": "new",
                 "score_details": {
                     "score": 75,
                     "priority": "Hot",
@@ -131,3 +142,17 @@ class ActionItem(BaseModel):
     action_text: str = Field(..., description="Description of the action to take")
     is_done: bool = Field(default=False, description="Whether the action has been completed")
     lead_id: str = Field(..., description="Associated lead ID")
+
+
+class StageUpdateRequest(BaseModel):
+    """Request model for updating a lead's pipeline stage."""
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "stage": "meeting"
+            }
+        }
+    )
+    
+    stage: Stage = Field(..., description="New pipeline stage")
