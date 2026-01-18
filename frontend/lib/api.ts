@@ -19,7 +19,8 @@ export interface LeadInput {
     company_size: number;
     channel: string;
     interaction_count: number;
-    last_interaction_days_ago: number;
+    last_interaction_days_ago?: number;
+    last_interaction_date?: string;
     has_requested_pricing: boolean;
     has_demo_request: boolean;
     stage?: Stage;

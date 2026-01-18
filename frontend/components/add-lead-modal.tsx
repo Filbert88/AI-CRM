@@ -13,6 +13,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { createLead } from "@/lib/api"
 
 interface AddLeadModalProps {
     isOpen: boolean
@@ -85,15 +86,9 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
                 has_demo_request: formData.requestedDemo,
             }
 
-            const response = await fetch("http://localhost:8000/api/v1/leads/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            })
+            await createLead(payload)
 
-            if (!response.ok) {
-                throw new Error("Failed to create lead")
-            }
+
 
             toast({
                 title: "Success",
