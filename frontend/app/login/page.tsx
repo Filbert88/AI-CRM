@@ -7,20 +7,28 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Mail, Lock, Loader2, ArrowRight } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
+import { login } from "@/lib/api"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { login: authLogin } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login
-    setTimeout(() => {
-      router.push("/dashboard")
-    }, 1000)
+    try {
+      const data = await login({ email, password })
+      authLogin(data.access_token)
+    } catch (error) {
+      console.error("Login failed", error)
+      alert("Login failed. Please check your credentials.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

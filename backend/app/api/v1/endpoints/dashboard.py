@@ -7,6 +7,8 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from app.models.schemas import LeadResponse, DashboardSummary, ActionItem
 from app.repositories.lead_repo import LeadRepository, get_lead_repository
+from app.api.deps import get_current_user
+from app.models.user import UserResponse
 
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -20,7 +22,8 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
     description="Retrieve all leads sorted by score in descending order."
 )
 async def get_leads(
-    lead_repository: LeadRepository = Depends(get_lead_repository)
+    lead_repository: LeadRepository = Depends(get_lead_repository),
+    current_user: UserResponse = Depends(get_current_user)
 ) -> List[LeadResponse]:
     """
     Get all leads from the system, sorted by score.
@@ -30,7 +33,7 @@ async def get_leads(
     
     - **Returns**: List of all leads with their scoring details
     """
-    return lead_repository.get_all_leads()
+    return lead_repository.get_all_leads(owner_id=str(current_user.id))
 
 
 @router.get(
@@ -41,7 +44,8 @@ async def get_leads(
     description="Get summary statistics including counts of Hot, Warm, and Cold leads."
 )
 async def get_summary(
-    lead_repository: LeadRepository = Depends(get_lead_repository)
+    lead_repository: LeadRepository = Depends(get_lead_repository),
+    current_user: UserResponse = Depends(get_current_user)
 ) -> DashboardSummary:
     """
     Get summary statistics for the dashboard.
@@ -53,7 +57,7 @@ async def get_summary(
     
     - **Returns**: Dashboard summary with lead counts
     """
-    return lead_repository.get_summary()
+    return lead_repository.get_summary(owner_id=str(current_user.id))
 
 
 @router.get(
@@ -64,7 +68,8 @@ async def get_summary(
     description="Get suggested action items for sales representatives based on hot leads."
 )
 async def get_actions(
-    lead_repository: LeadRepository = Depends(get_lead_repository)
+    lead_repository: LeadRepository = Depends(get_lead_repository),
+    current_user: UserResponse = Depends(get_current_user)
 ) -> List[ActionItem]:
     """
     Get action items for the sales team.
@@ -74,4 +79,4 @@ async def get_actions(
     
     - **Returns**: List of action items for follow-up
     """
-    return lead_repository.get_actions()
+    return lead_repository.get_actions(owner_id=str(current_user.id))

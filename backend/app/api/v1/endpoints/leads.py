@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from app.models.schemas import LeadInput, ScoringResult, LeadResponse, StageUpdateRequest
 from app.services.scoring_engine import LeadScoringService, get_scoring_service
 from app.repositories.lead_repo import LeadRepository, get_lead_repository
+from app.api.deps import get_current_user
+from app.models.user import UserResponse
 
 
 router = APIRouter(prefix="/leads", tags=["Leads"])
@@ -21,7 +23,8 @@ router = APIRouter(prefix="/leads", tags=["Leads"])
 )
 async def score_lead(
     lead: LeadInput,
-    scoring_service: LeadScoringService = Depends(get_scoring_service)
+    scoring_service: LeadScoringService = Depends(get_scoring_service),
+    current_user: UserResponse = Depends(get_current_user)
 ) -> ScoringResult:
     """
     Calculate the score for a lead without persisting it.
@@ -45,7 +48,8 @@ async def score_lead(
 async def create_lead(
     lead: LeadInput,
     scoring_service: LeadScoringService = Depends(get_scoring_service),
-    lead_repository: LeadRepository = Depends(get_lead_repository)
+    lead_repository: LeadRepository = Depends(get_lead_repository),
+    current_user: UserResponse = Depends(get_current_user)
 ) -> LeadResponse:
     """
     Create a new lead, calculate its score, and persist it.
@@ -66,7 +70,7 @@ async def create_lead(
     )
     
     # Persist to repository
-    lead_repository.add_lead(lead_response)
+    lead_repository.add_lead(lead_response, owner_id=str(current_user.id))
     
     return lead_response
 
@@ -81,7 +85,8 @@ async def create_lead(
 async def update_lead_stage(
     lead_id: str,
     stage_update: StageUpdateRequest,
-    lead_repository: LeadRepository = Depends(get_lead_repository)
+    lead_repository: LeadRepository = Depends(get_lead_repository),
+    current_user: UserResponse = Depends(get_current_user)
 ) -> LeadResponse:
     """
     Update the pipeline stage for a lead.
@@ -92,7 +97,7 @@ async def update_lead_stage(
     - **stage_update**: New stage value
     - **Returns**: Updated lead response
     """
-    updated_lead = lead_repository.update_stage(lead_id, stage_update.stage)
+    updated_lead = lead_repository.update_stage(lead_id, stage_update.stage, owner_id=str(current_user.id))
     
     if not updated_lead:
         raise HTTPException(

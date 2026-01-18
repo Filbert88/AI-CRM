@@ -25,7 +25,7 @@ class LeadRepository:
         """Initialize the repository with a Supabase client."""
         self._client = client
     
-    def get_all_leads(self) -> List[LeadResponse]:
+    def get_all_leads(self, owner_id: str) -> List[LeadResponse]:
         """
         Get all leads sorted by score in descending order.
         
@@ -34,12 +34,13 @@ class LeadRepository:
         """
         response = self._client.table(self.TABLE_NAME)\
             .select("*")\
+            .eq("owner_id", owner_id)\
             .order("score", desc=True)\
             .execute()
         
         return [self._row_to_lead_response(row) for row in response.data]
     
-    def get_summary(self) -> DashboardSummary:
+    def get_summary(self, owner_id: str) -> DashboardSummary:
         """
         Calculate dashboard summary statistics.
         
@@ -48,6 +49,7 @@ class LeadRepository:
         """
         response = self._client.table(self.TABLE_NAME)\
             .select("priority")\
+            .eq("owner_id", owner_id)\
             .execute()
         
         leads = response.data
@@ -62,7 +64,7 @@ class LeadRepository:
             cold_leads=cold_count
         )
     
-    def get_actions(self) -> List[ActionItem]:
+    def get_actions(self, owner_id: str) -> List[ActionItem]:
         """
         Generate action items for high-priority leads based on specific signals.
         
@@ -76,6 +78,7 @@ class LeadRepository:
         # Get top 5 hot leads
         response = self._client.table(self.TABLE_NAME)\
             .select("*")\
+            .eq("owner_id", owner_id)\
             .eq("priority", Priority.HOT.value)\
             .order("score", desc=True)\
             .limit(5)\
@@ -116,17 +119,19 @@ class LeadRepository:
         
         return actions
     
-    def add_lead(self, lead: LeadResponse) -> LeadResponse:
+    def add_lead(self, lead: LeadResponse, owner_id: str) -> LeadResponse:
         """
         Add a new lead to the database.
         
         Args:
             lead: LeadResponse object to add
+            owner_id: ID of the user adding the lead
             
         Returns:
             The added LeadResponse object
         """
         data = {
+            "owner_id": owner_id,
             "lead_id": lead.lead_id,
             "industry": lead.industry,
             "company_size": lead.company_size,
@@ -144,12 +149,13 @@ class LeadRepository:
         self._client.table(self.TABLE_NAME).insert(data).execute()
         return lead
     
-    def get_lead_by_id(self, lead_id: str) -> Optional[LeadResponse]:
+    def get_lead_by_id(self, lead_id: str, owner_id: str) -> Optional[LeadResponse]:
         """
-        Get a lead by its ID.
+        Get a lead by its ID and owner.
         
         Args:
             lead_id: The lead ID to search for
+            owner_id: The owner ID
             
         Returns:
             LeadResponse if found, None otherwise
@@ -157,6 +163,7 @@ class LeadRepository:
         response = self._client.table(self.TABLE_NAME)\
             .select("*")\
             .eq("lead_id", lead_id)\
+            .eq("owner_id", owner_id)\
             .limit(1)\
             .execute()
         
@@ -183,13 +190,14 @@ class LeadRepository:
             )
         )
     
-    def update_stage(self, lead_id: str, stage: Stage) -> Optional[LeadResponse]:
+    def update_stage(self, lead_id: str, stage: Stage, owner_id: str) -> Optional[LeadResponse]:
         """
         Update the pipeline stage for a lead.
         """
         response = self._client.table(self.TABLE_NAME)\
             .update({"stage": stage.value})\
             .eq("lead_id", lead_id)\
+            .eq("owner_id", owner_id)\
             .execute()
         
         if response.data:

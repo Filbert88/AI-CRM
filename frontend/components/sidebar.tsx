@@ -3,9 +3,11 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LayoutDashboard, Users, TrendingUp, Settings, LogOut } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { logout } = useAuth()
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -37,11 +39,10 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                isActive
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
                   ? "active-nav bg-white/5 text-indigo-400"
                   : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-              }`}
+                }`}
             >
               <Icon size={20} />
               <span className="text-sm font-medium">{item.label}</span>
@@ -51,7 +52,10 @@ export function Sidebar() {
       </nav>
 
       {/* Logout */}
-      <button className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all w-full">
+      <button
+        onClick={logout}
+        className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all w-full"
+      >
         <LogOut size={20} />
         <span className="text-sm font-medium">Sign Out</span>
       </button>

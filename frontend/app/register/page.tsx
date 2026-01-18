@@ -7,6 +7,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Mail, Lock, User, Loader2, ArrowRight } from "lucide-react"
+import { register, login } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
@@ -14,14 +16,24 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { login: authLogin } = useAuth()
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate registration
-    setTimeout(() => {
-      router.push("/dashboard")
-    }, 1000)
+    try {
+      // Register
+      await register({ email, password, full_name: name })
+
+      // Auto login
+      const loginData = await login({ email, password })
+      authLogin(loginData.access_token)
+    } catch (error) {
+      console.error("Registration failed", error)
+      alert("Registration failed. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

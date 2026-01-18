@@ -53,13 +53,25 @@ export interface ActionItem {
     lead_id: string;
 }
 
+async function fetchWithAuth(url: string, options: RequestInit = {}) {
+    const token = localStorage.getItem("token");
+    const headers = {
+        ...options.headers,
+        ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        "Content-Type": "application/json",
+    };
+
+    const response = await fetch(url, { ...options, headers: headers as HeadersInit });
+    return response;
+}
+
 // API Functions
 
 /**
  * Get all leads sorted by score
  */
 export async function getLeads(): Promise<LeadResponse[]> {
-    const response = await fetch(`${API_BASE_URL}/dashboard/leads`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/dashboard/leads`);
     if (!response.ok) {
         throw new Error("Failed to fetch leads");
     }
@@ -84,11 +96,8 @@ export async function getPipelineLeads(): Promise<PipelineLead[]> {
  * Update a lead's pipeline stage
  */
 export async function updateLeadStage(leadId: string, stage: Stage): Promise<LeadResponse> {
-    const response = await fetch(`${API_BASE_URL}/leads/${encodeURIComponent(leadId)}/stage`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/leads/${encodeURIComponent(leadId)}/stage`, {
         method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-        },
         body: JSON.stringify({ stage }),
     });
     if (!response.ok) {
@@ -101,7 +110,7 @@ export async function updateLeadStage(leadId: string, stage: Stage): Promise<Lea
  * Get dashboard summary (lead counts by priority)
  */
 export async function getDashboardSummary(): Promise<DashboardSummary> {
-    const response = await fetch(`${API_BASE_URL}/dashboard/summary`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/dashboard/summary`);
     if (!response.ok) {
         throw new Error("Failed to fetch dashboard summary");
     }
@@ -112,7 +121,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
  * Get action items for sales reps
  */
 export async function getActions(): Promise<ActionItem[]> {
-    const response = await fetch(`${API_BASE_URL}/dashboard/actions`);
+    const response = await fetchWithAuth(`${API_BASE_URL}/dashboard/actions`);
     if (!response.ok) {
         throw new Error("Failed to fetch actions");
     }
@@ -123,11 +132,8 @@ export async function getActions(): Promise<ActionItem[]> {
  * Score a lead (stateless - doesn't save)
  */
 export async function scoreLead(lead: LeadInput): Promise<ScoringResult> {
-    const response = await fetch(`${API_BASE_URL}/leads/score`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/leads/score`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
         body: JSON.stringify(lead),
     });
     if (!response.ok) {
@@ -140,15 +146,54 @@ export async function scoreLead(lead: LeadInput): Promise<ScoringResult> {
  * Create a new lead (scores and saves)
  */
 export async function createLead(lead: LeadInput): Promise<LeadResponse> {
-    const response = await fetch(`${API_BASE_URL}/leads/`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/leads/`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
         body: JSON.stringify(lead),
     });
     if (!response.ok) {
         throw new Error("Failed to create lead");
+    }
+    return response.json();
+}
+
+export async function login(data: any): Promise<any> {
+    const formData = new URLSearchParams();
+    formData.append('username', data.email);
+    formData.append('password', data.password);
+
+    const response = await fetch(`${API_BASE_URL}/auth/token`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error("Login failed");
+    }
+    return response.json();
+}
+
+export async function register(data: any): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw new Error("Registration failed");
+    }
+    return response.json();
+}
+
+export async function getMe(): Promise<any> {
+    const response = await fetchWithAuth(`${API_BASE_URL}/auth/me`);
+    if (!response.ok) {
+        throw new Error("Failed to fetch user profile");
     }
     return response.json();
 }

@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     # Supabase Settings
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
+
+    # Auth Settings
+    SECRET_KEY: str = "changethis-to-a-secure-secret-key-in-production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS Settings
     BACKEND_CORS_ORIGINS: list[str] = [
