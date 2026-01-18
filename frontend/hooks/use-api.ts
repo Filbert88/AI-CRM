@@ -67,7 +67,20 @@ export function useDashboardSummary() {
         fetchSummary()
     }, [])
 
-    return { summary, loading, error }
+    const refetch = async () => {
+        try {
+            setLoading(true)
+            const data = await getDashboardSummary()
+            setSummary(data)
+            setError(null)
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to fetch summary")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return { summary, loading, error, refetch }
 }
 
 /**
@@ -94,5 +107,18 @@ export function useActions() {
         fetchActions()
     }, [])
 
-    return { actions, loading, error }
+    const refetch = async () => {
+        try {
+            setLoading(true)
+            const data = await getActions()
+            setActions(data)
+            setError(null)
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to fetch actions")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return { actions, loading, error, refetch }
 }

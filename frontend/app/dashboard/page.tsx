@@ -14,9 +14,10 @@ import { AddLeadModal } from "@/components/add-lead-modal"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function DashboardPage() {
-  const { summary, loading: summaryLoading, error: summaryError } = useDashboardSummary()
-  const { actions, loading: actionsLoading, error: actionsError } = useActions()
+  const { summary, loading: summaryLoading, error: summaryError, refetch: refetchSummary } = useDashboardSummary()
+  const { actions, loading: actionsLoading, error: actionsError, refetch: refetchActions } = useActions()
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false)
+  const [leadsRefreshKey, setLeadsRefreshKey] = useState(0)
 
   // Transform summary to pipeline metrics format
   const pipelineMetrics = summary
@@ -58,6 +59,14 @@ export default function DashboardPage() {
     description: action.action_text.split(" - ")[1] || action.lead_id,
     priority: action.is_done ? "low" : "high",
   }))
+
+  const handleLeadAdded = () => {
+    // Refetch all dashboard data
+    refetchSummary()
+    refetchActions()
+    // Force table refresh by updating key
+    setLeadsRefreshKey((prev) => prev + 1)
+  }
 
   return (
     <LayoutWrapper>
@@ -121,7 +130,7 @@ export default function DashboardPage() {
         )}
 
         {/* Priority Leads */}
-        <PriorityLeadsTable />
+        <PriorityLeadsTable key={leadsRefreshKey} />
       </div>
       <Button
         onClick={() => setIsAddLeadOpen(true)}
@@ -131,7 +140,7 @@ export default function DashboardPage() {
       </Button>
 
       {/* Add Lead Modal */}
-      <AddLeadModal isOpen={isAddLeadOpen} onOpenChange={setIsAddLeadOpen} />
+      <AddLeadModal isOpen={isAddLeadOpen} onOpenChange={setIsAddLeadOpen} onLeadAdded={handleLeadAdded} />
     </LayoutWrapper>
   )
 }
