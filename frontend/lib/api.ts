@@ -5,7 +5,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 // Types matching backend schemas
-export type Stage = "new" | "meeting" | "negotiation" | "closed";
+export type Stage = "new" | "meeting" | "negotiation" | "closed" | "rejected";
 
 export interface ScoringResult {
     score: number;

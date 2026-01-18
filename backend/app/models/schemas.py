@@ -20,6 +20,7 @@ class Stage(str, Enum):
     MEETING = "meeting"
     NEGOTIATION = "negotiation"
     CLOSED = "closed"
+    REJECTED = "rejected"
 
 
 class LeadInput(BaseModel):

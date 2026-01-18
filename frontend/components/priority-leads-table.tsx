@@ -1,8 +1,9 @@
-"use client"
-
+import { useState } from "react"
 import { useLeads } from "@/hooks/use-api"
 import { Flame, Eye, Loader2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { LeadDetailModal } from "@/components/lead-detail-modal"
+import type { LeadResponse } from "@/lib/api"
 
 const getPriorityStyles = (priority: string) => {
   const normalizedPriority = priority.toLowerCase()
@@ -29,6 +30,13 @@ const getInitials = (leadId: string) => {
 
 export function PriorityLeadsTable() {
   const { leads, loading, error } = useLeads()
+  const [selectedLead, setSelectedLead] = useState<LeadResponse | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleOpenDetail = (lead: LeadResponse) => {
+    setSelectedLead(lead)
+    setIsModalOpen(true)
+  }
 
   if (loading) {
     return (
@@ -90,59 +98,70 @@ export function PriorityLeadsTable() {
   }
 
   return (
-    <div className="glass-panel p-6">
-      <h3 className="text-lg font-semibold text-foreground mb-6">High Priority Leads</h3>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-white/5">
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Lead</th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Score</th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Priority</th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">AI Insight</th>
-              <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads.map((lead) => (
-              <tr key={lead.lead_id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
-                      {getInitials(lead.lead_id)}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground text-sm">{lead.lead_id}</p>
-                      <p className="text-xs text-muted-foreground">{lead.industry} • {lead.channel}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground">{lead.score_details.score}</span>
-                    {lead.score_details.score >= 70 && <Flame size={16} className="glow-red" />}
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <span className={`text-xs font-medium px-3 py-1 rounded-full ${getPriorityStyles(lead.score_details.priority)}`}>
-                    {lead.score_details.priority}
-                  </span>
-                </td>
-                <td className="py-4 px-4">
-                  <p className="text-xs text-muted-foreground italic">
-                    {lead.score_details.explanations.slice(0, 2).join(", ")}
-                  </p>
-                </td>
-                <td className="py-4 px-4 text-center">
-                  <button className="p-1 hover:bg-white/10 rounded-lg transition-colors">
-                    <Eye size={16} className="text-muted-foreground hover:text-foreground" />
-                  </button>
-                </td>
+    <>
+      <div className="glass-panel p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-6">High Priority Leads</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/5">
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Lead</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Score</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Priority</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">AI Insight</th>
+                <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {leads.map((lead) => (
+                <tr key={lead.lead_id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold">
+                        {getInitials(lead.lead_id)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground text-sm">{lead.lead_id}</p>
+                        <p className="text-xs text-muted-foreground">{lead.industry} • {lead.channel}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground">{lead.score_details.score}</span>
+                      {lead.score_details.score >= 70 && <Flame size={16} className="glow-red" />}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className={`text-xs font-medium px-3 py-1 rounded-full ${getPriorityStyles(lead.score_details.priority)}`}>
+                      {lead.score_details.priority}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <p className="text-xs text-muted-foreground italic">
+                      {lead.score_details.explanations.slice(0, 2).join(", ")}
+                    </p>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <button
+                      onClick={() => handleOpenDetail(lead)}
+                      className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      <Eye size={16} className="text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      <LeadDetailModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        lead={selectedLead}
+      />
+    </>
   )
 }

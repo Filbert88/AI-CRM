@@ -29,6 +29,7 @@ const stages: { id: Stage; title: string; color: string }[] = [
   { id: "meeting", title: "Arranged Meeting", color: "from-purple-500 to-purple-600" },
   { id: "negotiation", title: "Negotiation", color: "from-orange-500 to-orange-600" },
   { id: "closed", title: "Closed", color: "from-emerald-500 to-emerald-600" },
+  { id: "rejected", title: "Rejected", color: "from-red-500 to-red-600" },
 ]
 
 export default function LeadsPage() {
@@ -232,7 +233,7 @@ export default function LeadsPage() {
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
-            <div className="grid grid-cols-4 gap-8">
+            <div className="grid grid-cols-5 gap-4">
               {stages.map((stage) => (
                 <KanbanColumn
                   key={stage.id}
