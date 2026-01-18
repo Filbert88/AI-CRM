@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     
     # CORS Settings
     BACKEND_CORS_ORIGINS: list[str] = [
+        "https://ai-crm-olj.vercel.app",
+        "https://ai-crm-olj.vercel.app/",
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:3000",
