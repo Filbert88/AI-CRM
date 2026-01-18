@@ -2,6 +2,7 @@
 
 import { useLeads } from "@/hooks/use-api"
 import { Flame, Eye, Loader2 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const getPriorityStyles = (priority: string) => {
   const normalizedPriority = priority.toLowerCase()
@@ -33,9 +34,45 @@ export function PriorityLeadsTable() {
     return (
       <div className="glass-panel p-6">
         <h3 className="text-lg font-semibold text-foreground mb-6">High Priority Leads</h3>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-muted-foreground">Loading leads...</span>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/5">
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Lead</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Score</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">Priority</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground">AI Insight</th>
+                <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <tr key={i} className="border-b border-white/5">
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-8 h-8 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-32" />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <Skeleton className="h-6 w-8" />
+                  </td>
+                  <td className="py-4 px-4">
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </td>
+                  <td className="py-4 px-4">
+                    <Skeleton className="h-4 w-48" />
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <Skeleton className="h-6 w-6 rounded-lg ml-auto mr-auto" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     )

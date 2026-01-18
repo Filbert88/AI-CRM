@@ -152,19 +152,25 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
                                 <SelectTrigger className="bg-white/5 border-white/10 text-foreground">
                                     <SelectValue placeholder="Select industry" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-zinc-800 border-white/10">
-                                    <SelectItem value="Tech" className="text-foreground">
-                                        Tech
-                                    </SelectItem>
-                                    <SelectItem value="Finance" className="text-foreground">
-                                        Finance
-                                    </SelectItem>
-                                    <SelectItem value="Health" className="text-foreground">
-                                        Health
-                                    </SelectItem>
-                                    <SelectItem value="Retail" className="text-foreground">
-                                        Retail
-                                    </SelectItem>
+                                <SelectContent className="bg-zinc-800 border-white/10 max-h-[200px]">
+                                    <SelectItem value="Technology" className="text-foreground">Technology</SelectItem>
+                                    <SelectItem value="Finance" className="text-foreground">Finance</SelectItem>
+                                    <SelectItem value="Healthcare" className="text-foreground">Healthcare</SelectItem>
+                                    <SelectItem value="Retail" className="text-foreground">Retail</SelectItem>
+                                    <SelectItem value="E-commerce" className="text-foreground">E-commerce</SelectItem>
+                                    <SelectItem value="Manufacturing" className="text-foreground">Manufacturing</SelectItem>
+                                    <SelectItem value="Education" className="text-foreground">Education</SelectItem>
+                                    <SelectItem value="Consulting" className="text-foreground">Consulting</SelectItem>
+                                    <SelectItem value="Real Estate" className="text-foreground">Real Estate</SelectItem>
+                                    <SelectItem value="Logistics" className="text-foreground">Logistics</SelectItem>
+                                    <SelectItem value="Media" className="text-foreground">Media</SelectItem>
+                                    <SelectItem value="Insurance" className="text-foreground">Insurance</SelectItem>
+                                    <SelectItem value="Agriculture" className="text-foreground">Agriculture</SelectItem>
+                                    <SelectItem value="Construction" className="text-foreground">Construction</SelectItem>
+                                    <SelectItem value="Hospitality" className="text-foreground">Hospitality</SelectItem>
+                                    <SelectItem value="Legal" className="text-foreground">Legal</SelectItem>
+                                    <SelectItem value="Non-profit" className="text-foreground">Non-profit</SelectItem>
+                                    <SelectItem value="Transportation" className="text-foreground">Transportation</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -192,18 +198,13 @@ export function AddLeadModal({ isOpen, onOpenChange, onLeadAdded }: AddLeadModal
                                     <SelectValue placeholder="Select channel" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-zinc-800 border-white/10">
-                                    <SelectItem value="Website" className="text-foreground">
-                                        Website
-                                    </SelectItem>
-                                    <SelectItem value="LinkedIn" className="text-foreground">
-                                        LinkedIn
-                                    </SelectItem>
-                                    <SelectItem value="Referral" className="text-foreground">
-                                        Referral
-                                    </SelectItem>
-                                    <SelectItem value="WhatsApp" className="text-foreground">
-                                        WhatsApp
-                                    </SelectItem>
+                                    <SelectItem value="Website" className="text-foreground">Website</SelectItem>
+                                    <SelectItem value="LinkedIn" className="text-foreground">LinkedIn</SelectItem>
+                                    <SelectItem value="Referral" className="text-foreground">Referral</SelectItem>
+                                    <SelectItem value="WhatsApp" className="text-foreground">WhatsApp</SelectItem>
+                                    <SelectItem value="Trade Show" className="text-foreground">Trade Show</SelectItem>
+                                    <SelectItem value="Email Campaign" className="text-foreground">Email Campaign</SelectItem>
+                                    <SelectItem value="Social Media" className="text-foreground">Social Media</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

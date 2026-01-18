@@ -9,6 +9,20 @@ import { Button } from "@/components/ui/button"
 import { LayoutGrid, List, Plus, Loader2, RefreshCw } from "lucide-react"
 import { getPipelineLeads, updateLeadStage, type PipelineLead, type Stage } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { KanbanCard } from "@/components/kanban-card"
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragOverEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 
 const stages: { id: Stage; title: string; color: string }[] = [
   { id: "new", title: "New", color: "from-blue-500 to-blue-600" },
@@ -24,6 +38,21 @@ export default function LeadsPage() {
   const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban")
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false)
   const { toast } = useToast()
+
+  // DnD State
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const [originalStage, setOriginalStage] = useState<Stage | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   const fetchLeads = async () => {
     try {
@@ -42,26 +71,78 @@ export default function LeadsPage() {
     fetchLeads()
   }, [])
 
-  const moveCard = async (cardId: string) => {
-    const card = leads.find((l) => l.id === cardId)
-    if (!card) return
+  const getLeadsByStage = (stageId: Stage) => leads.filter((l) => l.stage === stageId)
 
-    const currentStageIndex = stages.findIndex((s) => s.id === card.stage)
-    if (currentStageIndex < stages.length - 1) {
-      const nextStage = stages[currentStageIndex + 1].id
+  const handleLeadAdded = () => {
+    fetchLeads()
+  }
 
-      // Optimistic update
-      setLeads(leads.map((l) => (l.id === cardId ? { ...l, stage: nextStage } : l)))
+  // DnD Handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event
+    const activeLead = leads.find((l) => l.id === active.id)
+    if (activeLead) {
+      setActiveId(active.id as string)
+      setOriginalStage(activeLead.stage)
+    }
+  }
 
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event
+    if (!over) return
+
+    const activeId = active.id as string
+    const overId = over.id as string
+
+    // Find the active lead
+    const activeLead = leads.find((l) => l.id === activeId)
+    if (!activeLead) return
+
+    // Find new stage
+    let newStage: Stage | null = null
+
+    // If over is a column
+    if (stages.some((s) => s.id === overId)) {
+      newStage = overId as Stage
+    }
+    // If over is another card
+    else {
+      const overLead = leads.find((l) => l.id === overId)
+      if (overLead) {
+        newStage = overLead.stage
+      }
+    }
+
+    // If stage changed, update state immediately (optimistic UI)
+    if (newStage && newStage !== activeLead.stage) {
+      setLeads((prev) =>
+        prev.map((l) => (l.id === activeId ? { ...l, stage: newStage! } : l))
+      )
+    }
+  }
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active } = event
+    const activeId = active.id as string
+    const activeLead = leads.find((l) => l.id === activeId)
+
+    setActiveId(null)
+
+    if (!activeLead || !originalStage) return
+
+    // Verify if stage actually changed
+    if (activeLead.stage !== originalStage) {
       try {
-        await updateLeadStage(cardId, nextStage)
+        await updateLeadStage(activeId, activeLead.stage)
         toast({
           title: "Stage Updated",
-          description: `Moved ${card.name} to ${stages[currentStageIndex + 1].title}`,
+          description: `Moved ${activeLead.name} to ${stages.find((s) => s.id === activeLead.stage)?.title}`,
         })
       } catch (err) {
-        // Rollback on error
-        setLeads(leads.map((l) => (l.id === cardId ? { ...l, stage: card.stage } : l)))
+        // Rollback
+        setLeads((prev) =>
+          prev.map((l) => (l.id === activeId ? { ...l, stage: originalStage } : l))
+        )
         toast({
           title: "Error",
           description: "Failed to update stage. Please try again.",
@@ -69,13 +150,11 @@ export default function LeadsPage() {
         })
       }
     }
+
+    setOriginalStage(null)
   }
 
-  const getLeadsByStage = (stageId: Stage) => leads.filter((l) => l.stage === stageId)
-
-  const handleLeadAdded = () => {
-    fetchLeads() 
-  }
+  const activeLead = activeId ? leads.find((l) => l.id === activeId) : null
 
   return (
     <LayoutWrapper>
@@ -146,17 +225,40 @@ export default function LeadsPage() {
 
         {/* Kanban View */}
         {!loading && !error && viewMode === "kanban" && (
-          <div className="grid grid-cols-4 gap-8">
-            {stages.map((stage) => (
-              <KanbanColumn
-                key={stage.id}
-                title={stage.title}
-                leads={getLeadsByStage(stage.id)}
-                color={stage.color}
-                onMoveCard={stage.id !== "closed" ? moveCard : undefined}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid grid-cols-4 gap-8">
+              {stages.map((stage) => (
+                <KanbanColumn
+                  key={stage.id}
+                  id={stage.id}
+                  title={stage.title}
+                  leads={getLeadsByStage(stage.id)}
+                  color={stage.color}
+                // We don't need manual onMoveCard anymore since we have DnD
+                // But we can keep it if we want hybrid, though DnD is better.
+                />
+              ))}
+            </div>
+
+            <DragOverlay>
+              {activeLead ? (
+                <div className="opacity-80 rotate-2">
+                  <KanbanCard
+                    id={`${activeLead.id}-overlay`}
+                    name={activeLead.name}
+                    company={activeLead.company}
+                    score={activeLead.score}
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
 
         {/* List View */}

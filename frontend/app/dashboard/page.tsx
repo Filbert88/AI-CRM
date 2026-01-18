@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { AddLeadModal } from "@/components/add-lead-modal"
 
+import { Skeleton } from "@/components/ui/skeleton"
+
 export default function DashboardPage() {
   const { summary, loading: summaryLoading, error: summaryError } = useDashboardSummary()
   const { actions, loading: actionsLoading, error: actionsError } = useActions()
@@ -70,8 +72,20 @@ export default function DashboardPage() {
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-4">Pipeline Summary</h2>
           {summaryLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            <div className="grid grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="glass-panel p-6 flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-4 rounded-full" />
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                  <Skeleton className="h-12 w-full mt-2" />
+                </div>
+              ))}
             </div>
           ) : summaryError ? (
             <div className="text-center py-8 text-red-400">
@@ -88,8 +102,17 @@ export default function DashboardPage() {
 
         {/* Action Queue */}
         {actionsLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Recommended Actions</h2>
+            {[1, 2].map((i) => (
+              <div key={i} className="glass-panel p-4 flex items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+                <Skeleton className="h-8 w-20 rounded-full" />
+              </div>
+            ))}
           </div>
         ) : actionsError ? (
           <div className="glass-panel p-6 text-center text-red-400">{actionsError}</div>
